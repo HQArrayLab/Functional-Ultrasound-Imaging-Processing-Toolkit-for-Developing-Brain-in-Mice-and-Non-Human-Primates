@@ -26,7 +26,7 @@ Implementation of NoRMCorre algorithm for non-rigid motion correction:
 - Parameter optimization for developmental brain imaging
 - GUI for interactive parameter tuning and visualization
 
-### 4. Rate-of-Change Visualization (`Rate-of-change_visualisation.m`)
+### 4. Rate-of-Change Visualization (`Rate_of_change_visualisation.m`)
 Spatio-temporal correlation analysis of fUS signals with stimuli:
 - Normalized correlation mapping
 - Sliding window averaging
@@ -62,7 +62,7 @@ Comprehensive data analysis toolkit:
 1. Visualize with `fUS_Visualization.m` for quality control
 2. Preprocess with `removeBurstframe.m` for artifact removal
 3. Apply `motion_correction.m` for motion stabilization
-4. Analyze stimulus responses with `Rate-of-change_visualisation.m`
+4. Analyze stimulus responses with `Rate_of_change_visualisation.m`
 5. Perform ROI-based quantification with `intensity_changes.m`
 6. Apply `Deconvolution.m` for signal purification when needed
 
