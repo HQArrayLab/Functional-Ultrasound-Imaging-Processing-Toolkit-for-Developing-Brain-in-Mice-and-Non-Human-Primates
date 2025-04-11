@@ -8,21 +8,12 @@
 
 clear all, clc
 
-%% Initialize output directory for results
-% Create timestamped folder name
-pathname = datestr(now,0);
-pathname = strrep(pathname,':','_');  % Replace colons for filesystem compatibility
-pathname = strrep(pathname,' ','_');  % Replace spaces
-mkdir(pathname);  % Create output directory
-addpath('./for_Rate-of-change_visualisation/');  % Add path to required functions
 
 %% Load experimental data
 % Load Doppler ultrasound data (Power Doppler Acquisition)
 load 'D:\2345Downloads\free_moving\code\zhaojj-250118-1-mousesound-second_141844_FusPlane.mat'
 
-% Load reference data (brain atlas and registration matrices)
-load('dataAtlas');
-load('rotationMatrix');
+
 
 % Extract Doppler data matrix
 Doppler = fusplane.Data;
@@ -56,7 +47,7 @@ colorbarmin = 0;  % Minimum value for color scale
 colorbarmax = 6;  % Maximum value for color scale
 
 % Video output settings
-v = VideoWriter('D:\2345Downloads\free_moving\code\video\zhaojj-250118-1-mousesound-second_141844_FusPlane_jet_line.mp4','MPEG-4');
+v = VideoWriter('D:\2345Downloads\free_moving\code\video\zhaojj-250118-1-mousesound-second_141844_FusPlane_jet_line11.mp4','MPEG-4');
 v.Quality = 95;
 v.FrameRate = 2;
 open(v);  % Initialize video file
@@ -139,17 +130,16 @@ for k = 1+bin:step:size(DopplerN,3)-bin
     doppler = permute(doppler,[3,1,2]);
     
     % Register brain atlas (see addLines.m for parameters)
-    addLines(LinReg.Cor,slice,1.65,1.65,X,Z,0.62,-0.4,0.9,0.1);
+    
     hold off
     
     %% Capture Output
     frame = getframe(gcf);  % Capture current frame
     writeVideo(v, frame);    % Write to video file
-    saveas(gca,['./',pathname,'/',num2str(k),'.tif']);  % Save individual frame
 end
 
 % Save final frame and close video
-saveas(gca,'100_10.png');
+saveas(gca,'end.png');
 close(v);
 
 %% Helper Function: Create Tissue Mask
