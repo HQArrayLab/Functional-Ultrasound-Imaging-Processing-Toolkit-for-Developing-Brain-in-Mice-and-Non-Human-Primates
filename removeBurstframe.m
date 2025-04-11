@@ -9,21 +9,62 @@ data = data1.^0.25;  % Apply gamma correction to enhance low-intensity features
 % 2. Calculate L2 norm for each frame
 frameNorms = squeeze(sqrt(sum(sum(data.^2, 1), 2)));  % Calculate L2 norm for each frame
 
-% 3. Identify outlier frames using direct thresholding
+% 3. Identify potential outlier frames using direct thresholding
 thresh = [];  % Use automatic threshold range if empty
 outlierSel = 'direct';  % Use 'direct' method for outlier detection
 Nthresh = 100;  % Number of threshold levels to consider
-[errIDs, bestThresh] = directOutlierThresholding(frameNorms, thresh, outlierSel, Nthresh);
+[potentialOutlierIDs, bestThresh] = directOutlierThresholding(frameNorms, thresh, outlierSel, Nthresh);
 
-% 4. Visualize and save outlier frames
+% 4. Interactive outlier confirmation
+disp('Starting interactive outlier frame confirmation...');
+disp('For each frame, press "y" to confirm as outlier, "n" to reject, or "q" to quit early.');
+
+confirmedOutlierIDs = false(size(potentialOutlierIDs)); % Initialize all as not outliers
+outlierFrames = find(potentialOutlierIDs); % Get indices of potential outliers
+
+hFig = figure('Position', [100, 100, 800, 600]); % Create figure for display
+
+for i = 1:length(outlierFrames)
+    t = outlierFrames(i);
+    frame = data(:, :, t);
+    
+    % Display the frame
+    clf(hFig); % Clear current figure
+    Im2_norm = mat2gray(frame);
+    imagesc(x_image, z_image, Im2_norm);
+    caxis([0, 1]);
+    colormap('hot');
+    colorbar;
+    title(sprintf('Potential Outlier Frame %d (Norm: %.2f)\nPress "y"=outlier, "n"=normal, "q"=quit', t, frameNorms(t)));
+    
+    % Wait for user input
+    waitforbuttonpress;
+    key = get(gcf, 'CurrentCharacter');
+    
+    if lower(key) == 'y'
+        confirmedOutlierIDs(t) = true;
+        fprintf('Frame %d confirmed as outlier.\n', t);
+    elseif lower(key) == 'n'
+        fprintf('Frame %d marked as normal.\n', t);
+    elseif lower(key) == 'q'
+        fprintf('Early termination selected. %d frames remaining unconfirmed.\n', length(outlierFrames)-i);
+        break;
+    else
+        fprintf('Invalid key pressed. Frame %d skipped.\n', t);
+    end
+end
+
+close(hFig); % Close the display figure
+
+% 5. Visualize and save confirmed outlier frames
 outputDir = 'D:\2345Downloads\free_moving\code\output_images8\';
 if ~exist(outputDir, 'dir')
     mkdir(outputDir);  % Create directory if it doesn't exist
 end
 
-% Create and save figures for outlier frames
+% Create and save figures for confirmed outlier frames
 for t = 1:size(data, 3)
-    if errIDs(t)
+    if confirmedOutlierIDs(t)
         frame = data(:, :, t);
         figure('Visible', 'off');  % Create invisible figure for faster processing
         Im2_norm = mat2gray(frame);
@@ -31,27 +72,28 @@ for t = 1:size(data, 3)
         caxis([0, 1]);
         colormap('hot');
         colorbar;
-        title(sprintf('Outlier Frame %d (Norm: %.2f)', t, frameNorms(t)));
-        saveas(gcf, fullfile(outputDir, sprintf('outlier_frame_%01d.png', t)));
+        title(sprintf('Confirmed Outlier Frame %d (Norm: %.2f)', t, frameNorms(t)));
+        saveas(gcf, fullfile(outputDir, sprintf('confirmed_outlier_frame_%01d.png', t)));
         close;
     end
 end
 
-% 5. Plot norm histogram with threshold
+% 6. Plot norm histogram with threshold and confirmed outliers
 figure;
 histogram(frameNorms, 50);
 hold on;
 xline(bestThresh, 'r', 'LineWidth', 2);
+plot(frameNorms(confirmedOutlierIDs), zeros(sum(confirmedOutlierIDs),1), 'rx', 'MarkerSize', 10, 'LineWidth', 2);
 xlabel('L2 Norm');
 ylabel('Frequency');
 title(sprintf('Frame Norm Distribution (Threshold: %.2f)', bestThresh));
-legend('Norm Distribution', 'Best Threshold');
+legend('Norm Distribution', 'Best Threshold', 'Confirmed Outliers');
 hold off;
-saveas(gcf, fullfile(outputDir, 'norm_distribution.png'));
+saveas(gcf, fullfile(outputDir, 'norm_distribution_with_confirmed.png'));
 
-% 6. Remove outliers and perform linear interpolation
-goodFrames = find(~errIDs);  % Indices of valid frames
-badFrames = find(errIDs);    % Indices of outlier frames
+% 7. Remove confirmed outliers and perform linear interpolation
+goodFrames = find(~confirmedOutlierIDs);  % Indices of valid frames
+badFrames = find(confirmedOutlierIDs);    % Indices of confirmed outlier frames
 
 % Initialize cleaned data matrix
 cleanedData = zeros(size(data));
@@ -70,12 +112,11 @@ for x = 1:size(data, 1)
     end
 end
 
-% 7. Save cleaned data as new .mat file
-
+% 8. Save cleaned data as new .mat file
 fusplane.Data = cleanedData;  % Replace with cleaned data
 save('D:\2345Downloads\free_moving\code\zhaojj-250119-p2-step1-dark_152641_FusPlane_cleaned.mat', 'fusplane');
 
-% Helper function for outlier detection
+% Helper function for outlier detection (unchanged)
 function [errIDs, bestThresh] = directOutlierThresholding(frameNorms, thresh, outlierSel, Nthresh)
     if isempty(thresh)
         thresh = [min(frameNorms), max(frameNorms)];  % Use full range if no threshold specified
