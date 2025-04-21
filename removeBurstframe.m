@@ -99,13 +99,13 @@ badFrames = find(confirmedOutlierIDs);    % Indices of confirmed outlier frames
 cleanedData = zeros(size(data));
 
 % Process each pixel location
-for x = 1:size(data, 1)
-    for y = 1:size(data, 2)
+for x = 1:size(data1, 1)
+    for y = 1:size(data1, 2)
         % Extract time series for this pixel
-        pixelSeries = squeeze(data(x, y, :));
+        pixelSeries = squeeze(data1(x, y, :));
         
         % Replace outliers using linear interpolation
-        cleanedPixelSeries = interp1(goodFrames, pixelSeries(goodFrames), 1:size(data, 3), 'linear', 'extrap');
+        cleanedPixelSeries = interp1(goodFrames, pixelSeries(goodFrames), 1:size(data1, 3), 'linear', 'extrap');
         
         % Store cleaned data
         cleanedData(x, y, :) = cleanedPixelSeries;
