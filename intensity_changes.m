@@ -136,7 +136,7 @@ for i = 1:roi_num
     dd2 = data1.*roi_mask_temp;
     roi_average = squeeze(sum(sum(dd2,1),2))./sum(roi_mask_temp(:));
     roi_average = filloutliers(roi_average, "nearest", "mean");
-    roi_average = smooth(roi_average, 10);
+    roi_average = smoothdata(roi_average, 'movmean',10);
     
     % Calculate baseline (F0) as mean of first index frames
     F0 = mean(roi_average(1:index));
