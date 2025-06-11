@@ -4,7 +4,7 @@ load('D:\2345Downloads\free_moving\code\zhaojj-250119-p2-step1-dark_152641_FusPl
 data1 = fusplane.Data;  % Replace with your actual variable name
 x_image = 0.1 * [1:1:size(data1, 2)];  % x-axis coordinates (scaled by 0.1)
 z_image = 0.075 * [1:1:size(data1, 1)]; % z-axis coordinates (scaled by 0.075)
-data = data1.^0.25;  % Apply gamma correction to enhance low-intensity features
+data = data1.^0.4;  % Apply gamma correction to enhance low-intensity features
 
 % 2. Calculate L2 norm for each frame
 frameNorms = squeeze(sqrt(sum(sum(data.^2, 1), 2)));  % Calculate L2 norm for each frame
