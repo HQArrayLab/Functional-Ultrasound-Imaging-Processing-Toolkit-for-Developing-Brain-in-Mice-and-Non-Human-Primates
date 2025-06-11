@@ -31,9 +31,9 @@ figure('Visible', 'on');
 % Loop through each frame in the 3D matrix F
 for i = 1:k  
     % Process the i-th frame:
-    % 1. Apply gamma correction (Im^0.25) to enhance low-intensity features
+    % 1. Apply gamma correction (Im^0.4) to enhance low-intensity features
     % 2. Normalize the image to [0, 1] using mat2gray for consistent scaling
-    Im = F(:, :, i).^0.25;  
+    Im = F(:, :, i).^0.4;  
     Im_norm = mat2gray(Im);  % Normalize to [0, 1] based on min/max values
 
     % Display the processed image with scaled x and z axes
